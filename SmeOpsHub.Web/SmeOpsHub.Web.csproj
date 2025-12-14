@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SmeOpsHub.Infrastructure\SmeOpsHub.Infrastructure.csproj" />
+    <ProjectReference Include="..\SmeOpsHub.Modules.Crm\SmeOpsHub.Modules.Crm.csproj" />
+    <ProjectReference Include="..\SmeOpsHub.Modules.Hr\SmeOpsHub.Modules.Hr.csproj" />
+    <ProjectReference Include="..\SmeOpsHub.Modules.Projects\SmeOpsHub.Modules.Projects.csproj" />
+    <ProjectReference Include="..\SmeOpsHub.SharedKernel\SmeOpsHub.SharedKernel.csproj" />
+  </ItemGroup>
+
+</Project>
