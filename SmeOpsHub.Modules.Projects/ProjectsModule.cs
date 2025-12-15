@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SmeOpsHub.Modules.Projects.Application;
+using SmeOpsHub.Modules.Projects.Application.Services;
 using SmeOpsHub.SharedKernel;
 
 namespace SmeOpsHub.Modules.Projects;
@@ -13,7 +15,8 @@ public class ProjectsModule : IModule
 
     public void RegisterServices(IServiceCollection services, IConfiguration configuration)
     {
-        // Later: register Projects services, etc.
+        services.AddScoped<IProjectService, ProjectService>();
+        services.AddScoped<ITaskService, TaskService>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)
@@ -21,7 +24,7 @@ public class ProjectsModule : IModule
         endpoints.MapAreaControllerRoute(
             name: "projects-area",
             areaName: "Projects",
-            pattern: "projects/{controller=Home}/{action=Index}/{id?}");
+            pattern: "projects/{controller=Projects}/{action=Index}/{id?}");
     }
 
     public void ConfigureMenu(IMenuBuilder menu)
@@ -29,7 +32,7 @@ public class ProjectsModule : IModule
         menu.AddMenuItem(new MenuItem(
             key: "projects",
             displayName: "Projects",
-            url: "/projects",
+            url: "/projects/projects",
             order: Order));
     }
 }

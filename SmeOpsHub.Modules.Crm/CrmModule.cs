@@ -16,6 +16,7 @@ public class CrmModule : IModule
     public void RegisterServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<ICompanyService, CompanyService>();
+        services.AddScoped<ICrmContactLookup, CrmContactLookupService>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)

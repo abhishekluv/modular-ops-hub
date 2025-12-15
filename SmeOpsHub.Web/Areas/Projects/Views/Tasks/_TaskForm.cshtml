@@ -1,0 +1,42 @@
+﻿@model TaskUpsertVm
+@using TaskStatus = SmeOpsHub.Modules.Projects.Domain.TaskStatus
+
+<div class="mb-3">
+    <label asp-for="Title" class="form-label"></label>
+    <input asp-for="Title" class="form-control" />
+    <span asp-validation-for="Title" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Description" class="form-label"></label>
+    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+    <span asp-validation-for="Description" class="text-danger"></span>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <label asp-for="Status" class="form-label"></label>
+        <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<TaskStatus>()"></select>
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <label asp-for="Priority" class="form-label"></label>
+        <select asp-for="Priority" class="form-select" asp-items="Html.GetEnumSelectList<TaskPriority>()"></select>
+        <span asp-validation-for="Priority" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <label asp-for="DueDate" class="form-label"></label>
+        <input asp-for="DueDate" class="form-control" type="date" />
+        <span asp-validation-for="DueDate" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="mb-3">
+    <label asp-for="AssignedToContactId" class="form-label">Assign to CRM Contact</label>
+    <select asp-for="AssignedToContactId" class="form-select"
+            asp-items="@(ViewBag.ContactSelectList as IEnumerable<SelectListItem>)">
+    </select>
+    <span asp-validation-for="AssignedToContactId" class="text-danger"></span>
+</div>

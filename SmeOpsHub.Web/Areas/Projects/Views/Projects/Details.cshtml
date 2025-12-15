@@ -1,0 +1,119 @@
+﻿@model IReadOnlyList<TaskListItemVm>
+@{
+    ViewData["Title"] = "Project Details";
+
+    var projectId = (Guid)ViewBag.ProjectId;
+    var projectName = (string)ViewBag.ProjectName;
+    var showDeletedTasks = (bool)(ViewBag.ShowDeletedTasks ?? false);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-0">@projectName</h2>
+        <small class="text-muted">Project Tasks</small>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary"
+           asp-area="Projects" asp-controller="Tasks" asp-action="Create"
+           asp-route-projectId="@projectId">
+            + Add Task
+        </a>
+
+        @if (!showDeletedTasks)
+        {
+            <a class="btn btn-outline-secondary"
+               asp-area="Projects" asp-controller="Projects" asp-action="Details"
+               asp-route-id="@projectId" asp-route-showDeletedTasks="true">
+                Show deleted tasks
+            </a>
+        }
+        else
+        {
+            <a class="btn btn-outline-secondary"
+               asp-area="Projects" asp-controller="Projects" asp-action="Details"
+               asp-route-id="@projectId">
+                Hide deleted tasks
+            </a>
+        }
+
+        <a class="btn btn-outline-secondary"
+           asp-area="Projects" asp-controller="Projects" asp-action="Index">
+            Back
+        </a>
+    </div>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-info">No tasks yet.</div>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Due</th>
+                <th>Assigned To</th>
+                <th>Status</th>
+                <th class="text-end" style="width: 340px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in Model)
+            {
+                <tr>
+                    <td class="fw-semibold">@t.Title</td>
+                    <td>@t.Status</td>
+                    <td>@t.Priority</td>
+                    <td>@(t.DueDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                    <td>@t.AssignedToDisplay</td>
+                    <td>
+                        @if (t.IsDeleted)
+                        {
+                            <span class="badge bg-danger">Deleted</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary"
+                           asp-area="Projects" asp-controller="Tasks" asp-action="Edit"
+                           asp-route-id="@t.Id" asp-route-projectId="@projectId">
+                            Edit
+                        </a>
+
+                        @if (!t.IsDeleted)
+                        {
+                            <form class="d-inline" method="post"
+                                  asp-area="Projects" asp-controller="Tasks" asp-action="SoftDelete"
+                                  asp-route-id="@t.Id" asp-route-projectId="@projectId">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Soft delete this task?');">
+                                    Soft Delete
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form class="d-inline" method="post"
+                                  asp-area="Projects" asp-controller="Tasks" asp-action="Restore"
+                                  asp-route-id="@t.Id" asp-route-projectId="@projectId">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-success">
+                                    Restore
+                                </button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

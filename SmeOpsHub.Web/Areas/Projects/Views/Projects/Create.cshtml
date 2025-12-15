@@ -1,0 +1,25 @@
+﻿@model ProjectUpsertVm
+@{
+    ViewData["Title"] = "Create Project";
+}
+
+<h2>Create Project</h2>
+
+<form method="post" asp-area="Projects" asp-controller="Projects" asp-action="Create">
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <partial name="_ProjectForm" model="Model" />
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a class="btn btn-outline-secondary" asp-area="Projects" asp-controller="Projects" asp-action="Index">
+            Cancel
+        </a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
