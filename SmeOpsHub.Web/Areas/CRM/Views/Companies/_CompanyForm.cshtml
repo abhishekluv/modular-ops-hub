@@ -1,0 +1,19 @@
+﻿@model CompanyUpsertVm
+
+<div class="mb-3">
+    <label asp-for="Name" class="form-label"></label>
+    <input asp-for="Name" class="form-control" />
+    <span asp-validation-for="Name" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Website" class="form-label"></label>
+    <input asp-for="Website" class="form-control" />
+    <span asp-validation-for="Website" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="LeadStage" class="form-label"></label>
+    <select asp-for="LeadStage" class="form-select" asp-items="Html.GetEnumSelectList<LeadStage>()"></select>
+    <span asp-validation-for="LeadStage" class="text-danger"></span>
+</div>

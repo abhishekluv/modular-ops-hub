@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using SmeOpsHub.Infrastructure.Persistence;
+using SmeOpsHub.SharedKernel;
 using SmeOpsHub.Web.Infrastructure.Modules;
 using SmeOpsHub.Web.Infrastructure.Navigation;
+using SmeOpsHub.Web.Infrastructure.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,9 @@ foreach(var module in modules)
 {
     mvcBuilder.AddApplicationPart(module.GetType().Assembly);
 }
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {

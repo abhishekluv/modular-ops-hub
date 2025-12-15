@@ -1,0 +1,68 @@
+﻿@model IReadOnlyList<CompanyListItemVm>
+@{
+    ViewData["Title"] = "Companies";
+    var showDeleted = (bool)(ViewBag.ShowDeleted ?? false);
+}
+
+<h2>Companies</h2>
+
+<div class="mb-3">
+    <a class="btn btn-primary" asp-area="CRM" asp-controller="Companies" asp-action="Create">Create Company</a>
+
+    @if (!showDeleted)
+    {
+        <a class="btn btn-outline-secondary" asp-area="CRM" asp-controller="Companies" asp-action="Index" asp-route-showDeleted="true">
+            Show Deleted
+        </a>
+    }
+    else
+    {
+        <a class="btn btn-outline-secondary" asp-area="CRM" asp-controller="Companies" asp-action="Index">
+            Hide Deleted
+        </a>
+    }
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Lead Stage</th>
+            <th>Contacts</th>
+            <th>Status</th>
+            <th style="width: 260px;"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.Name</td>
+                <td>@c.LeadStage</td>
+                <td>@c.ContactsCount</td>
+                <td>@(c.IsDeleted ? "Deleted" : "Active")</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-primary"
+                       asp-area="CRM" asp-controller="Companies" asp-action="Edit" asp-route-id="@c.Id">Edit</a>
+
+                    @if (!c.IsDeleted)
+                    {
+                        <form class="d-inline" method="post"
+                              asp-area="CRM" asp-controller="Companies" asp-action="SoftDelete" asp-route-id="@c.Id">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Soft Delete</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form class="d-inline" method="post"
+                              asp-area="CRM" asp-controller="Companies" asp-action="Restore" asp-route-id="@c.Id">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-success">Restore</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

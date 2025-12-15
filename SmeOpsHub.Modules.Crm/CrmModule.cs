@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SmeOpsHub.Modules.Crm.Application;
+using SmeOpsHub.Modules.Crm.Application.Services;
 using SmeOpsHub.SharedKernel;
 
 namespace SmeOpsHub.Modules.Crm;
@@ -13,7 +15,7 @@ public class CrmModule : IModule
 
     public void RegisterServices(IServiceCollection services, IConfiguration configuration)
     {
-        // Later: register CRM DbContext, services, etc.
+        services.AddScoped<ICompanyService, CompanyService>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)
@@ -22,7 +24,7 @@ public class CrmModule : IModule
         endpoints.MapAreaControllerRoute(
             name: "crm-area",
             areaName: "CRM",
-            pattern: "crm/{controller=Home}/{action=Index}/{id?}");
+            pattern: "crm/{controller=Companies}/{action=Index}/{id?}");
     }
 
     public void ConfigureMenu(IMenuBuilder menu)
@@ -30,7 +32,7 @@ public class CrmModule : IModule
         menu.AddMenuItem(new MenuItem(
             key: "crm",
             displayName: "CRM",
-            url: "/crm",
+            url: "/crm/companies",
             order: Order));
     }
 }

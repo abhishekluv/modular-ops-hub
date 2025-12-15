@@ -9,11 +9,19 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
     {
+
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // Apply EF configs from all module assemblies (CRM, Projects, HR)
+        var moduleAssemblies = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(a => a.GetName().Name?.StartsWith("SmeOpsHub.Modules.", StringComparison.OrdinalIgnoreCase) == true);
+
+        foreach (var asm in moduleAssemblies)
+            modelBuilder.ApplyConfigurationsFromAssembly(asm);
 
         ApplySoftDeleteQueryFilters(modelBuilder);
     }
