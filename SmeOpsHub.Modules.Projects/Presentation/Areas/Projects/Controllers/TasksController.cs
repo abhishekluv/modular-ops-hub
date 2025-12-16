@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SmeOpsHub.Modules.Projects.Application;
 using SmeOpsHub.Modules.Projects.Application.Models;
 using SmeOpsHub.SharedKernel;
+using SmeOpsHub.SharedKernel.Security;
 
 namespace SmeOpsHub.Modules.Projects.Presentation.Areas.Projects.Controllers;
 
 [Area("Projects")]
+[Authorize]
 public class TasksController : Controller
 {
     private readonly ITaskService _tasks;
@@ -66,6 +69,7 @@ public class TasksController : Controller
     }
 
     [HttpPost, ValidateAntiForgeryToken]
+    [Authorize(Policy = AppPolicies.CanSoftDelete)]
     public async Task<IActionResult> SoftDelete(Guid id, Guid projectId, CancellationToken ct)
     {
         await _tasks.SoftDeleteAsync(id, ct);
@@ -73,6 +77,7 @@ public class TasksController : Controller
     }
 
     [HttpPost, ValidateAntiForgeryToken]
+    [Authorize(Policy = AppPolicies.CanSoftDelete)]
     public async Task<IActionResult> Restore(Guid id, Guid projectId, CancellationToken ct)
     {
         await _tasks.RestoreAsync(id, ct);

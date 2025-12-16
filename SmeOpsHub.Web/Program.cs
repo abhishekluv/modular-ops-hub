@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SmeOpsHub.Infrastructure.Identity;
 using SmeOpsHub.Infrastructure.Persistence;
 using SmeOpsHub.SharedKernel;
+using SmeOpsHub.SharedKernel.Security;
+using SmeOpsHub.Web.Infrastructure.Identity;
 using SmeOpsHub.Web.Infrastructure.Modules;
 using SmeOpsHub.Web.Infrastructure.Navigation;
 using SmeOpsHub.Web.Infrastructure.Security;
@@ -38,7 +42,35 @@ foreach(var module in modules)
 builder.Services.AddSingleton<IModuleCatalog>(new ModuleCatalog(modules, menuBuilder.Items));
 builder.Services.AddSingleton(modules);
 
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = false;
+
+        // reasonable defaults (tweak later)
+        options.Password.RequiredLength = 8;
+        options.Password.RequireDigit = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireNonAlphanumeric = true;
+    })
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders()
+    .AddDefaultUI();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(AppPolicies.CanSoftDelete,
+        p => p.RequireRole(AppRoles.Admin, AppRoles.Manager));
+
+    options.AddPolicy(AppPolicies.CanApproveLeave,
+        p => p.RequireRole(AppRoles.Admin, AppRoles.Manager));
+});
+
+builder.Services.AddRazorPages();
+
 var app = builder.Build();
+
+await IdentitySeeder.SeedAsync(app.Services, app.Configuration);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -50,8 +82,10 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapRazorPages();
 
 app.MapStaticAssets();
 

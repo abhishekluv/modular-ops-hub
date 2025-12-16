@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SmeOpsHub.Modules.Crm.Application;
 using SmeOpsHub.Modules.Crm.Application.Models;
+using SmeOpsHub.SharedKernel.Security;
 
 namespace SmeOpsHub.Modules.Crm.Presentation.Areas.CRM.Controllers;
 
 [Area("CRM")]
+[Authorize]
 public class CompaniesController : Controller
 {
     private readonly ICompanyService _companies;
@@ -51,6 +54,7 @@ public class CompaniesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Policy = AppPolicies.CanSoftDelete)]
     public async Task<IActionResult> SoftDelete(Guid id, CancellationToken ct)
     {
         await _companies.SoftDeleteCompanyAsync(id, ct);
@@ -59,6 +63,7 @@ public class CompaniesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Policy = AppPolicies.CanSoftDelete)]
     public async Task<IActionResult> Restore(Guid id, CancellationToken ct)
     {
         await _companies.RestoreCompanyAsync(id, ct);

@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SmeOpsHub.Modules.Hr.Application;
 using SmeOpsHub.Modules.Hr.Application.Models;
+using SmeOpsHub.SharedKernel.Security;
 
 namespace SmeOpsHub.Modules.Hr.Presentation.Areas.HR.Controllers;
 
 [Area("HR")]
+[Authorize]
 public class LeaveRequestsController : Controller
 {
     private readonly ILeaveService _leaves;
@@ -56,16 +59,19 @@ public class LeaveRequestsController : Controller
     }
 
     [HttpPost, ValidateAntiForgeryToken]
+    [Authorize(Policy = AppPolicies.CanApproveLeave)]
     public async Task<IActionResult> Approve(Guid id, Guid? employeeId, CancellationToken ct)
     {
         await _leaves.ApproveAsync(id, note: null, ct: ct);
         return RedirectToAction(nameof(Index), new { employeeId });
     }
 
+    [Authorize(Policy = AppPolicies.CanApproveLeave)]
     public IActionResult Reject(Guid id, Guid? employeeId)
         => View(new LeaveRejectVm { Id = id, ReturnEmployeeId = employeeId });
 
     [HttpPost, ValidateAntiForgeryToken]
+    [Authorize(Policy = AppPolicies.CanApproveLeave)]
     public async Task<IActionResult> Reject(LeaveRejectVm vm, CancellationToken ct)
     {
         if (!ModelState.IsValid) return View(vm);
@@ -75,6 +81,7 @@ public class LeaveRequestsController : Controller
     }
 
     [HttpPost, ValidateAntiForgeryToken]
+    [Authorize(Policy = AppPolicies.CanSoftDelete)]
     public async Task<IActionResult> SoftDelete(Guid id, Guid? employeeId, CancellationToken ct)
     {
         await _leaves.SoftDeleteAsync(id, ct);
@@ -82,6 +89,7 @@ public class LeaveRequestsController : Controller
     }
 
     [HttpPost, ValidateAntiForgeryToken]
+    [Authorize(Policy = AppPolicies.CanSoftDelete)]
     public async Task<IActionResult> Restore(Guid id, Guid? employeeId, CancellationToken ct)
     {
         await _leaves.RestoreAsync(id, ct);

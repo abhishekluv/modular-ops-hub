@@ -1,10 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using SmeOpsHub.Infrastructure.Identity;
 using SmeOpsHub.SharedKernel;
 using System.Linq.Expressions;
 
 namespace SmeOpsHub.Infrastructure.Persistence;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)

@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SmeOpsHub.Modules.Hr.Application;
 using SmeOpsHub.Modules.Hr.Application.Models;
+using SmeOpsHub.SharedKernel.Security;
 
 namespace SmeOpsHub.Modules.Hr.Presentation.Areas.HR.Controllers;
 
 [Area("HR")]
+[Authorize]
 public class EmployeesController : Controller
 {
     private readonly IEmployeeService _employees;
@@ -61,6 +64,7 @@ public class EmployeesController : Controller
     }
 
     [HttpPost, ValidateAntiForgeryToken]
+    [Authorize(Policy = AppPolicies.CanSoftDelete)]
     public async Task<IActionResult> SoftDelete(Guid id, CancellationToken ct)
     {
         await _employees.SoftDeleteAsync(id, ct);
@@ -68,6 +72,7 @@ public class EmployeesController : Controller
     }
 
     [HttpPost, ValidateAntiForgeryToken]
+    [Authorize(Policy = AppPolicies.CanSoftDelete)]
     public async Task<IActionResult> Restore(Guid id, CancellationToken ct)
     {
         await _employees.RestoreAsync(id, ct);
