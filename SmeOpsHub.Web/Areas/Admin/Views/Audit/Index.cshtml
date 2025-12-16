@@ -1,0 +1,59 @@
+﻿@model IReadOnlyList<AuditEvent>
+@{
+    ViewData["Title"] = "Audit Log";
+}
+
+<h2>Audit Log</h2>
+
+<form class="row g-2 mb-3" method="get">
+    <div class="col-md-3">
+        <input class="form-control" name="actionFilter" value="@ViewBag.ActionFilter" placeholder="Action (e.g. SOFT_DELETE)" />
+    </div>
+    <div class="col-md-3">
+        <input class="form-control" name="entityType" value="@ViewBag.EntityType" placeholder="EntityType (e.g. Company)" />
+    </div>
+    <div class="col-md-4">
+        <input class="form-control" name="search" value="@ViewBag.Search" placeholder="Search summary / entityId / user" />
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-outline-primary w-100" type="submit">Filter</button>
+    </div>
+</form>
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-info">No audit events found.</div>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Time (UTC)</th>
+                <th>Action</th>
+                <th>Entity</th>
+                <th>User</th>
+                <th>Summary</th>
+                <th class="text-end">Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in Model)
+            {
+                <tr>
+                    <td>@e.OccurredAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td><span class="badge bg-secondary">@e.Action</span></td>
+                    <td>@e.EntityType (@e.EntityId)</td>
+                    <td>@(e.UserName ?? e.UserId ?? "-")</td>
+                    <td>@(e.Summary ?? "-")</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary"
+                           asp-area="Admin" asp-controller="Audit" asp-action="Details" asp-route-id="@e.Id">
+                            View
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

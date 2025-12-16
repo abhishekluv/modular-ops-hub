@@ -1,0 +1,16 @@
+﻿@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    string Active(string a) => string.Equals(action, a, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
+
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link @Active("Companies")" asp-area="Admin" asp-controller="RecycleBin" asp-action="Companies">Companies</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @Active("Projects")" asp-area="Admin" asp-controller="RecycleBin" asp-action="Projects">Projects</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @Active("Employees")" asp-area="Admin" asp-controller="RecycleBin" asp-action="Employees">Employees</a>
+    </li>
+</ul>

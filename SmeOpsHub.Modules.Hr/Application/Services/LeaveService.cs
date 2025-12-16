@@ -3,6 +3,8 @@ using SmeOpsHub.Infrastructure.Persistence;
 using SmeOpsHub.Modules.Hr.Application.Models;
 using SmeOpsHub.Modules.Hr.Domain;
 using SmeOpsHub.SharedKernel;
+using SmeOpsHub.SharedKernel.Auditing;
+using System.Text.Json;
 
 namespace SmeOpsHub.Modules.Hr.Application.Services;
 
@@ -71,6 +73,25 @@ public class LeaveService : ILeaveService
         if (leave is null) return false;
 
         leave.Approve(_currentUser.UserId, note);
+
+        _db.Set<AuditEvent>().Add(new AuditEvent
+        {
+            Action = "LEAVE_APPROVED",
+            EntityType = nameof(LeaveRequest),
+            EntityId = leave.Id.ToString(),
+            Module = "HR",
+            Summary = $"Approved leave {leave.Id} for employee {leave.EmployeeId}",
+            UserId = _currentUser.UserId,
+            UserName = _currentUser.UserId,
+            DataJson = JsonSerializer.Serialize(new
+            {
+                leave.EmployeeId,
+                leave.StartDate,
+                leave.EndDate,
+                leave.Type
+            })
+        });
+
         await _db.SaveChangesAsync(ct);
         return true;
     }
@@ -81,6 +102,26 @@ public class LeaveService : ILeaveService
         if (leave is null) return false;
 
         leave.Reject(_currentUser.UserId, note);
+
+        _db.Set<AuditEvent>().Add(new AuditEvent
+        {
+            Action = "LEAVE_REJECTED",
+            EntityType = nameof(LeaveRequest),
+            EntityId = leave.Id.ToString(),
+            Module = "HR",
+            Summary = $"Rejected leave {leave.Id} for employee {leave.EmployeeId}",
+            UserId = _currentUser.UserId,
+            UserName = _currentUser.UserId,
+            DataJson = JsonSerializer.Serialize(new
+            {
+                leave.EmployeeId,
+                leave.StartDate,
+                leave.EndDate,
+                leave.Type,
+                Note = note
+            })
+        });
+
         await _db.SaveChangesAsync(ct);
         return true;
     }

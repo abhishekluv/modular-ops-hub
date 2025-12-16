@@ -14,4 +14,5 @@ public sealed class CurrentUserService : ICurrentUserService
 
     public string? UserId => _http.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
     public string? UserName => _http.HttpContext?.User?.Identity?.Name;
+    public string? TraceId => _http.HttpContext?.TraceIdentifier;
 }

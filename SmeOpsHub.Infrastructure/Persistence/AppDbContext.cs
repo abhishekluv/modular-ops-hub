@@ -19,6 +19,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole, str
     {
         base.OnModelCreating(modelBuilder);
 
+        //apply Infrastructure configs
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
         // Apply EF configs from all module assemblies (CRM, Projects, HR)
         var moduleAssemblies = AppDomain.CurrentDomain.GetAssemblies()
             .Where(a => a.GetName().Name?.StartsWith("SmeOpsHub.Modules.", StringComparison.OrdinalIgnoreCase) == true);

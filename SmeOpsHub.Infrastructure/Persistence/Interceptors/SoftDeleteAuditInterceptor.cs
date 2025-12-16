@@ -1,24 +1,20 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Logging;
 using SmeOpsHub.SharedKernel;
+using SmeOpsHub.SharedKernel.Auditing;
 
 namespace SmeOpsHub.Infrastructure.Persistence.Interceptors;
 
 public sealed class SoftDeleteAuditInterceptor : SaveChangesInterceptor
 {
-    private readonly ILogger<SoftDeleteAuditInterceptor> _logger;
     private readonly ICurrentUserService _currentUser;
 
-    public SoftDeleteAuditInterceptor(ILogger<SoftDeleteAuditInterceptor> logger, ICurrentUserService currentUser)
-    {
-        _logger = logger;
-        _currentUser = currentUser;
-    }
+    public SoftDeleteAuditInterceptor(ICurrentUserService currentUser)
+        => _currentUser = currentUser;
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
-        Audit(eventData.Context);
+        AddAuditEvents(eventData.Context);
         return base.SavingChanges(eventData, result);
     }
 
@@ -27,13 +23,17 @@ public sealed class SoftDeleteAuditInterceptor : SaveChangesInterceptor
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
-        Audit(eventData.Context);
+        AddAuditEvents(eventData.Context);
         return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
-    private void Audit(DbContext? db)
+    private void AddAuditEvents(DbContext? db)
     {
         if (db is null) return;
+
+        // Avoid auditing audit rows
+        if (db.ChangeTracker.Entries().Any(e => e.Entity is AuditEvent))
+            return;
 
         foreach (var entry in db.ChangeTracker.Entries()
                      .Where(e => e.State == EntityState.Modified && e.Entity is ISoftDeletable))
@@ -41,24 +41,25 @@ public sealed class SoftDeleteAuditInterceptor : SaveChangesInterceptor
             var isDeletedProp = entry.Property(nameof(ISoftDeletable.IsDeleted));
             if (!isDeletedProp.IsModified) continue;
 
-            var before = (bool)isDeletedProp.OriginalValue!;
-            var after = (bool)isDeletedProp.CurrentValue!;
-
+            var before = (bool)(isDeletedProp.OriginalValue ?? false);
+            var after = (bool)(isDeletedProp.CurrentValue ?? false);
             if (before == after) continue;
 
-            var entityName = entry.Metadata.ClrType.Name;
-            var idValue = entry.Properties.FirstOrDefault(p => p.Metadata.Name == "Id")?.CurrentValue;
+            var entityType = entry.Entity.GetType().Name;
+            var id = entry.Properties.FirstOrDefault(p => p.Metadata.Name == "Id")?.CurrentValue?.ToString() ?? "?";
 
-            if (after)
+            var action = after ? "SOFT_DELETE" : "RESTORE";
+
+            db.Set<AuditEvent>().Add(new AuditEvent
             {
-                _logger.LogInformation("SOFT_DELETE {Entity} Id={Id} By={UserId}",
-                    entityName, idValue, _currentUser.UserId);
-            }
-            else
-            {
-                _logger.LogInformation("RESTORE {Entity} Id={Id} By={UserId}",
-                    entityName, idValue, _currentUser.UserId);
-            }
+                Action = action,
+                EntityType = entityType,
+                EntityId = id,
+                Summary = $"{action} {entityType}({id})",
+                UserId = _currentUser.UserId,
+                UserName = _currentUser.UserName,
+                TraceId = _currentUser.TraceId
+            });
         }
     }
 }

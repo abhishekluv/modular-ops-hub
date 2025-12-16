@@ -116,6 +116,11 @@ foreach(var module in moduleCatalog.Modules)
     module.MapEndpoints(app);
 }
 
+app.MapAreaControllerRoute(name: "admin", 
+    areaName: "Admin", 
+    pattern: "Admin/{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
