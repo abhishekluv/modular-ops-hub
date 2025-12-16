@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.11">
       <PrivateAssets>all</PrivateAssets>
@@ -14,6 +16,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.11" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.11" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +27,10 @@
     <ProjectReference Include="..\SmeOpsHub.Modules.Hr\SmeOpsHub.Modules.Hr.csproj" />
     <ProjectReference Include="..\SmeOpsHub.Modules.Projects\SmeOpsHub.Modules.Projects.csproj" />
     <ProjectReference Include="..\SmeOpsHub.SharedKernel\SmeOpsHub.SharedKernel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Logs\" />
   </ItemGroup>
 
 </Project>

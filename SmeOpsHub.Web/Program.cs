@@ -1,7 +1,10 @@
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using SmeOpsHub.Infrastructure.Identity;
 using SmeOpsHub.Infrastructure.Persistence;
+using SmeOpsHub.Infrastructure.Persistence.Interceptors;
 using SmeOpsHub.SharedKernel;
 using SmeOpsHub.SharedKernel.Security;
 using SmeOpsHub.Web.Infrastructure.Identity;
@@ -11,6 +14,7 @@ using SmeOpsHub.Web.Infrastructure.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseSerilog((ctx, lc) => lc.ReadFrom.Configuration(ctx.Configuration));
 
 var modules = ModuleLoader.DiscoverModules();
 
@@ -21,14 +25,19 @@ foreach(var module in modules)
     mvcBuilder.AddApplicationPart(module.GetType().Assembly);
 }
 
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddScoped<SoftDeleteAuditInterceptor>();
+
+builder.Services.AddDbContext<AppDbContext>((sp, options) =>
 {
     var connectionString = builder.Configuration.GetConnectionString("SmeOpsHub") ?? throw new InvalidOperationException("Connection string 'SmeOpsHub' not found");
-
     options.UseSqlServer(connectionString);
+    options.AddInterceptors(sp.GetRequiredService<SoftDeleteAuditInterceptor>());
 });
 
 var menuBuilder = new MenuBuilder();
@@ -57,6 +66,11 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddDefaultTokenProviders()
     .AddDefaultUI();
 
+builder.Services.Configure<PasswordHasherOptions>(options =>
+{
+    options.IterationCount = 600000;
+});
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy(AppPolicies.CanSoftDelete,
@@ -76,10 +90,16 @@ await IdentitySeeder.SeedAsync(app.Services, app.Configuration);
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+    app.UseStatusCodePagesWithReExecute("/error/{0}");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+else
+{
+    app.UseDeveloperExceptionPage();
+}
 
+app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();

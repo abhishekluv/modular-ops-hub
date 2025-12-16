@@ -1,0 +1,17 @@
+﻿@using SmeOpsHub.Web.Controllers
+@model DashboardVm
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h2>Dashboard</h2>
+<p class="text-muted">High-level system stats</p>
+
+<div class="row g-3">
+    <div class="col-md-4"><div class="card"><div class="card-body"><h5>Companies</h5><div class="display-6">@Model.Companies</div></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><h5>Projects</h5><div class="display-6">@Model.Projects</div></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><h5>Employees</h5><div class="display-6">@Model.Employees</div></div></div></div>
+
+    <div class="col-md-6"><div class="card"><div class="card-body"><h5>Pending Leave Requests</h5><div class="display-6">@Model.PendingLeaves</div></div></div></div>
+    <div class="col-md-6"><div class="card"><div class="card-body"><h5>Open Tasks</h5><div class="display-6">@Model.OpenTasks</div></div></div></div>
+</div>
