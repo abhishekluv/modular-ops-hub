@@ -1,0 +1,134 @@
+﻿@model IReadOnlyList<LeaveRequestListItemVm>
+@{
+    ViewData["Title"] = "Leave Requests";
+    var employeeId = (Guid?)ViewBag.EmployeeId;
+    var showDeleted = (bool)(ViewBag.ShowDeleted ?? false);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-0">Leave Requests</h2>
+        <small class="text-muted">Approve / Reject workflow</small>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary" asp-area="HR" asp-controller="LeaveRequests" asp-action="Create" asp-route-employeeId="@employeeId">
+            + New Request
+        </a>
+
+        @if (!showDeleted)
+        {
+            <a class="btn btn-outline-secondary" asp-area="HR" asp-controller="LeaveRequests" asp-action="Index"
+               asp-route-employeeId="@employeeId" asp-route-showDeleted="true">Show deleted</a>
+        }
+        else
+        {
+            <a class="btn btn-outline-secondary" asp-area="HR" asp-controller="LeaveRequests" asp-action="Index"
+               asp-route-employeeId="@employeeId">Hide deleted</a>
+        }
+
+        <a class="btn btn-outline-secondary" asp-area="HR" asp-controller="Employees" asp-action="Index">Employees</a>
+    </div>
+</div>
+
+<form class="row g-2 mb-3" method="get" asp-area="HR" asp-controller="LeaveRequests" asp-action="Index">
+    <div class="col-md-6">
+        <select class="form-select" name="employeeId" asp-items="@(ViewBag.EmployeeSelectList as IEnumerable<SelectListItem>)"></select>
+    </div>
+    <div class="col-md-3">
+        <input type="hidden" name="showDeleted" value="@showDeleted" />
+        <button class="btn btn-outline-primary w-100" type="submit">Filter</button>
+    </div>
+</form>
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-info">No leave requests found.</div>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Type</th>
+                <th>Dates</th>
+                <th>Status</th>
+                <th>Reason</th>
+                <th>Record</th>
+                <th class="text-end" style="width: 420px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var l in Model)
+            {
+                <tr>
+                    <td class="fw-semibold">@l.EmployeeName</td>
+                    <td>@l.Type</td>
+                    <td>@l.StartDate.ToString("yyyy-MM-dd") → @l.EndDate.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        @if (l.Status == LeaveStatus.Pending)
+                        {
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        }
+                        else if (l.Status == LeaveStatus.Approved)
+                        {
+
+                            <span class="badge bg-success">Approved</span>
+                        }
+                        else
+                        {
+
+                            <span class="badge bg-danger">Rejected</span>
+                        }
+                    </td>
+                    <td>@(l.Reason ?? "-")</td>
+                    <td>@(l.IsDeleted ? "Deleted" : "Active")</td>
+
+                    <td class="text-end">
+                        @if (!l.IsDeleted && l.Status == LeaveStatus.Pending)
+                        {
+                            <form class="d-inline" method="post"
+                                  asp-area="HR" asp-controller="LeaveRequests" asp-action="Approve"
+                                  asp-route-id="@l.Id" asp-route-employeeId="@employeeId">
+                                @Html.AntiForgeryToken()
+                                <button class="btn btn-sm btn-outline-success" type="submit"
+                                        onclick="return confirm('Approve this leave request?');">
+                                    Approve
+                                </button>
+                            </form>
+
+                            <a class="btn btn-sm btn-outline-danger"
+                               asp-area="HR" asp-controller="LeaveRequests" asp-action="Reject"
+                               asp-route-id="@l.Id" asp-route-employeeId="@employeeId">
+                                Reject
+                            </a>
+                        }
+
+                        @if (!l.IsDeleted)
+                        {
+                            <form class="d-inline" method="post"
+                                  asp-area="HR" asp-controller="LeaveRequests" asp-action="SoftDelete"
+                                  asp-route-id="@l.Id" asp-route-employeeId="@employeeId">
+                                @Html.AntiForgeryToken()
+                                <button class="btn btn-sm btn-outline-danger" type="submit"
+                                        onclick="return confirm('Soft delete this leave request record?');">
+                                    Soft Delete
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form class="d-inline" method="post"
+                                  asp-area="HR" asp-controller="LeaveRequests" asp-action="Restore"
+                                  asp-route-id="@l.Id" asp-route-employeeId="@employeeId">
+                                @Html.AntiForgeryToken()
+                                <button class="btn btn-sm btn-outline-success" type="submit">Restore</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

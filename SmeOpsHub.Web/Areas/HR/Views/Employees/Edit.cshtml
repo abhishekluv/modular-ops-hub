@@ -1,0 +1,23 @@
+﻿@model EmployeeUpsertVm
+@{
+    ViewData["Title"] = "Edit Employee";
+    var id = (string?)ViewContext.RouteData.Values["id"];
+}
+
+<h2>Edit Employee</h2>
+
+<form method="post" asp-area="HR" asp-controller="Employees" asp-action="Edit" asp-route-id="@id">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <partial name="_EmployeeForm" model="Model" />
+
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary" type="submit">Save</button>
+        <a class="btn btn-outline-secondary" asp-area="HR" asp-controller="Employees" asp-action="Index">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

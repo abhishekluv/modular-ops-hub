@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SmeOpsHub.Modules.Hr.Application;
+using SmeOpsHub.Modules.Hr.Application.Services;
 using SmeOpsHub.SharedKernel;
 
 namespace SmeOpsHub.Modules.Hr;
@@ -13,7 +15,8 @@ public class HrModule : IModule
 
     public void RegisterServices(IServiceCollection services, IConfiguration configuration)
     {
-        // Later: register HR services, etc.
+        services.AddScoped<IEmployeeService, EmployeeService>();
+        services.AddScoped<ILeaveService, LeaveService>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)
@@ -21,7 +24,7 @@ public class HrModule : IModule
         endpoints.MapAreaControllerRoute(
             name: "hr-area",
             areaName: "HR",
-            pattern: "hr/{controller=Home}/{action=Index}/{id?}");
+            pattern: "hr/{controller=Employees}/{action=Index}/{id?}");
     }
 
     public void ConfigureMenu(IMenuBuilder menu)
@@ -29,7 +32,7 @@ public class HrModule : IModule
         menu.AddMenuItem(new MenuItem(
             key: "hr",
             displayName: "HR & Leave",
-            url: "/hr",
+            url: "/hr/employees",
             order: Order));
     }
 }

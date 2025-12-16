@@ -1,0 +1,32 @@
+﻿@model LeaveRejectVm
+@{
+    ViewData["Title"] = "Reject Leave";
+}
+
+<h2>Reject Leave Request</h2>
+
+<form method="post" asp-area="HR" asp-controller="LeaveRequests" asp-action="Reject">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ReturnEmployeeId" />
+
+    <div class="mb-3">
+        <label asp-for="Note" class="form-label"></label>
+        <textarea asp-for="Note" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Note" class="text-danger"></span>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button class="btn btn-danger" type="submit">Reject</button>
+        <a class="btn btn-outline-secondary"
+           asp-area="HR" asp-controller="LeaveRequests" asp-action="Index"
+           asp-route-employeeId="@Model.ReturnEmployeeId">
+            Cancel
+        </a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
